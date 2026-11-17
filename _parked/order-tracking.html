@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Track Your Order | Cakes Ami</title>
+<meta name="description" content="Check the status of your Cakes Ami order.">
+<meta name="theme-color" content="#7B1414">
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="track">
+<main id="main">
+  <header class="page-banner">
+    <div class="container">
+      <div class="crumbs"><a href="index.html">Home</a> / Track order</div>
+      <span class="eyebrow">Order tracking</span>
+      <h1 id="pageBannerTitle">Where's my cake?</h1>
+      <p>Enter the order number from your confirmation (for example CA-261116-AB12) to see how your cake is coming along.</p>
+    </div>
+  </header>
+  <section style="padding-top:10px">
+    <div class="container narrow">
+      <form class="track-form reveal" id="trackForm">
+        <label class="sr-only" for="trackId">Order number</label>
+        <input id="trackId" placeholder="CA-XXXXXX-XXXX" autocomplete="off" required>
+        <button class="btn" type="submit">Track order</button>
+      </form>
+      <div id="recentOrders"></div>
+      <div id="trackResult" style="margin-top:34px" aria-live="polite"></div>
+      <div class="note-box" style="margin-top:34px"><span data-icon="phone"></span><div>Questions about your order? Call or text <a data-biz="phone" href="#"></a>. We're happy to help.</div></div>
+    </div>
+  </section>
+</main>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
