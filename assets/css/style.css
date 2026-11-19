@@ -785,3 +785,211 @@ body[data-page="post"] .page-banner .container { display: block; }
           mask: linear-gradient(90deg, #000 0%, rgba(0,0,0,.55) 55%, transparent 100%);
   opacity: .55;
 }
+
+/* ---------- Home hero: faded photo backdrop ---------- */
+.hero { position: relative; isolation: isolate; background: #FFF6F9; }
+.hero::before {
+  content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 62%; z-index: -2; pointer-events: none;
+  background: url("../img/hero-bg.jpg") center 40% / cover no-repeat;
+  opacity: .5;
+  -webkit-mask: linear-gradient(90deg, transparent 0%, #000 45%);
+          mask: linear-gradient(90deg, transparent 0%, #000 45%);
+}
+.hero::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255,246,249,.25) 0%, rgba(255,246,249,0) 30%, rgba(255,246,249,0) 70%, #FFF6F9 100%),
+    linear-gradient(90deg, #FFF6F9 0%, rgba(255,246,249,.85) 40%, rgba(255,246,249,.35) 100%);
+}
+.hero > .container { position: relative; z-index: 1; }
+@media (max-width: 900px) {
+  .hero::before { width: 100%; -webkit-mask: none; mask: none; background-position: center 30%; }
+  .hero::after { background: linear-gradient(180deg, rgba(255,246,249,.45) 0%, rgba(255,246,249,.85) 50%, #FFF6F9 100%); }
+}
+
+/* ---------- Home hero: entrance choreography + gentle ambient motion ---------- */
+/* Hero handles its own entrance, so switch off the generic scroll-reveal here */
+.hero .reveal { opacity: 1; transform: none; transition: none; }
+
+/* Background photo: soft fade-in with a slow settle, then a very slow breathing zoom */
+.hero::before { animation: heroBgIn 2.2s cubic-bezier(.2,.7,.2,1) both, heroBgDrift 22s ease-in-out 2.2s infinite alternate; transform-origin: 70% 45%; }
+@keyframes heroBgIn { from { opacity: 0; transform: scale(1.12); } to { opacity: .5; transform: scale(1); } }
+@keyframes heroBgDrift { from { transform: scale(1); } to { transform: scale(1.06) translateX(-1.5%); } }
+
+/* Text: staggered fade-up with a soft blur that sharpens */
+.hero-grid > .reveal > * { animation: heroUp 1s cubic-bezier(.2,.8,.2,1) both; }
+.hero-grid > .reveal > .eyebrow    { animation-delay: .25s; }
+.hero-grid > .reveal > h1          { animation-delay: .4s; animation-duration: 1.2s; }
+.hero-grid > .reveal > .lead       { animation-delay: .65s; }
+.hero-grid > .reveal > .hero-cta   { animation-delay: .85s; }
+.hero-grid > .reveal > .hero-meta  { animation-delay: 1.05s; }
+@keyframes heroUp { from { opacity: 0; transform: translateY(24px); filter: blur(6px); } to { opacity: 1; transform: none; filter: blur(0); } }
+
+/* Headline accent: a hand-drawn underline sweeps in under "with love" */
+.hero h1 em { position: relative; white-space: nowrap; }
+.hero h1 em::after {
+  content: ""; position: absolute; left: 2%; right: 2%; bottom: .02em; height: .14em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'%3E%3Cpath d='M2 8 C 50 2, 120 2, 198 6' fill='none' stroke='%23E3342F' stroke-width='3' stroke-linecap='round' stroke-opacity='.55'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  transform: scaleX(0); transform-origin: left; animation: heroLine .9s cubic-bezier(.6,0,.2,1) 1.4s forwards;
+}
+@keyframes heroLine { to { transform: scaleX(1); } }
+
+/* Photos: arches rise in one after another, the blobs bloom, then everything floats softly */
+.hero-art .blob { animation: heroBloom 1.6s cubic-bezier(.2,.8,.2,1) .2s both; }
+.hero-art .blob.b2 { animation-delay: .45s; }
+@keyframes heroBloom { from { opacity: 0; scale: .7; } to { scale: 1; } }
+.hero-art .arch { animation: heroRise 1.1s cubic-bezier(.2,.8,.2,1) both, heroFloat 7s ease-in-out infinite alternate; }
+.hero-art .a1 { animation-delay: .5s, 1.6s; }
+.hero-art .a2 { animation-delay: .7s, 2.4s; animation-duration: 1.1s, 8s; }
+.hero-art .a3 { animation-delay: .9s, 1.9s; animation-duration: 1.1s, 6.5s; }
+@keyframes heroRise { from { opacity: 0; translate: 0 50px; scale: .94; } to { opacity: 1; translate: 0 0; scale: 1; } }
+@keyframes heroFloat { from { translate: 0 0; } to { translate: 0 -10px; } }
+.hero-art .arch img { transition: transform 1.2s cubic-bezier(.2,.8,.2,1); }
+.hero-art .arch:hover img { transform: scale(1.06); }
+.hero-art .badge, .hero-art .badge-center { animation-name: spin, heroPop; animation-duration: 24s, .8s; animation-timing-function: linear, cubic-bezier(.3,1.5,.5,1); animation-delay: 0s, 1.3s; animation-iteration-count: infinite, 1; animation-fill-mode: none, both; }
+.hero-art .badge-center { animation: heroPop .8s cubic-bezier(.3,1.5,.5,1) 1.45s both; }
+@keyframes heroPop { from { opacity: 0; scale: .4; } to { opacity: 1; scale: 1; } }
+
+/* Buttons: a soft light sheen glides across on hover */
+.hero-cta .btn { position: relative; overflow: hidden; isolation: isolate; }
+.hero-cta .btn::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 45%; z-index: -1; pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent);
+  transform: skewX(-20deg); transition: left .7s cubic-bezier(.2,.8,.2,1);
+}
+.hero-cta .btn.ghost::after { background: linear-gradient(100deg, transparent, rgba(235,196,226,.6), transparent); }
+.hero-cta .btn:hover::after { left: 120%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero h1 em::after { transform: none; }
+  .hero::before { opacity: .5; }
+}
+
+/* ---------- Home hero v3: no arches, the photo is the hero image ---------- */
+.hero::before { width: 60%; opacity: 1; background-position: center 30%;
+  -webkit-mask: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.6) 22%, #000 48%);
+          mask: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.6) 22%, #000 48%); }
+@keyframes heroBgIn { from { opacity: 0; transform: scale(1.12); } to { opacity: 1; transform: scale(1); } }
+.hero::after {
+  background:
+    linear-gradient(180deg, rgba(255,246,249,0) 75%, #FFF6F9 100%),
+    linear-gradient(90deg, #FFF6F9 0%, rgba(255,246,249,.9) 38%, rgba(255,246,249,.15) 62%, rgba(255,246,249,0) 100%);
+}
+.hero-art .badge { right: 4%; top: auto; bottom: 6%; top: auto; }
+.hero-art .badge-center { right: calc(4% + 38px); top: auto; bottom: calc(6% + 38px); }
+@media (max-width: 900px) {
+  .hero::before { width: 100%; background-position: center 25%; -webkit-mask: linear-gradient(180deg, #000 45%, transparent 85%); mask: linear-gradient(180deg, #000 45%, transparent 85%); }
+  .hero::after { background: linear-gradient(180deg, rgba(255,246,249,0) 0%, rgba(255,246,249,0) 30%, rgba(255,246,249,.92) 55%, #FFF6F9 100%); }
+  .hero-art { height: 300px; }
+}
+@media (max-width: 480px) {
+  .hero-art .badge-center { right: calc(4% + 27px); bottom: calc(6% + 27px); }
+}
+/* Badge: top-right corner over the plain backdrop, clear of the cake */
+.hero-art .badge { top: 0; bottom: auto; right: 0; }
+.hero-art .badge-center { top: 38px; bottom: auto; right: 38px; }
+@media (max-width: 900px) {
+  .hero-art .badge { top: 4px; right: 0; width: 90px; height: 90px; }
+  .hero-art .badge-center { top: calc(4px + 27px); right: 27px; width: 36px; height: 36px; }
+}
+@media (min-width: 901px) {
+  /* Anchor the badge to the full-width hero (not the centred column) so it sits in the empty top-right corner */
+  .hero > .container, .hero-art { position: static; }
+  .hero-art .badge { top: 36px; right: 4%; }
+  .hero-art .badge-center { top: calc(36px + 38px); right: calc(4% + 38px); }
+}
+
+/* ---------- Inner page banners: faded cake photo on the right, sprinkles + scalloped wave kept ---------- */
+.page-banner.has-photo { isolation: isolate; min-height: clamp(300px, 30vw, 380px); display: flex; align-items: center; }
+.page-banner.has-photo > .container { width: 100%; }
+.page-banner.has-photo::after {
+  display: block; content: ""; position: absolute; top: 0; bottom: 0; right: 0; left: auto; width: 55%; height: auto; z-index: -1; pointer-events: none;
+  background: url("../img/hero-bg.jpg") center 35% / cover no-repeat;
+  -webkit-mask: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.55) 30%, #000 60%), linear-gradient(180deg, #000 70%, transparent 100%);
+  -webkit-mask-composite: source-in;
+          mask: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.55) 30%, #000 60%) intersect, linear-gradient(180deg, #000 70%, transparent 100%);
+  transform-origin: 70% 40%;
+  animation: bannerBgIn 1.8s cubic-bezier(.2,.7,.2,1) both, heroBgDrift 22s ease-in-out 1.8s infinite alternate;
+}
+@keyframes bannerBgIn { from { opacity: 0; transform: scale(1.1); } to { opacity: 1; transform: scale(1); } }
+/* Text: same staggered fade-up as the home hero */
+.page-banner .banner-text > *, body[data-page="post"] .page-banner .container > * { animation: heroUp .9s cubic-bezier(.2,.8,.2,1) both; }
+.page-banner .banner-text > :nth-child(1), body[data-page="post"] .page-banner .container > :nth-child(1) { animation-delay: .15s; }
+.page-banner .banner-text > :nth-child(2), body[data-page="post"] .page-banner .container > :nth-child(2) { animation-delay: .3s; }
+.page-banner .banner-text > :nth-child(3), body[data-page="post"] .page-banner .container > :nth-child(3) { animation-delay: .45s; }
+.page-banner .banner-text > :nth-child(4) { animation-delay: .65s; }
+.page-banner .banner-text > :nth-child(5) { animation-delay: .8s; }
+@media (max-width: 900px) {
+  .page-banner.has-photo { min-height: 0; }
+  .page-banner.has-photo::after { width: 100%; opacity: .16;
+    -webkit-mask: linear-gradient(180deg, #000 40%, transparent 100%); mask: linear-gradient(180deg, #000 40%, transparent 100%); }
+  @keyframes bannerBgIn { from { opacity: 0; } to { opacity: .16; } }
+}
+/* Each inner page gets its own banner photo (Unsplash, see assets/img/banners/CREDITS.md) */
+body[data-page="shop"] .page-banner.has-photo::after     { background-image: url("../img/banners/shop.jpg"); }
+body[data-page="gallery"] .page-banner.has-photo::after  { background-image: url("../img/banners/gallery.jpg"); }
+body[data-page="about"] .page-banner.has-photo::after    { background-image: url("../img/banners/about.jpg"); }
+body[data-page="blog"] .page-banner.has-photo::after     { background-image: url("../img/banners/blog.jpg"); }
+body[data-page="contact"] .page-banner.has-photo::after  { background-image: url("../img/banners/contact.jpg"); }
+body[data-page="cart"] .page-banner.has-photo::after     { background-image: url("../img/banners/cart.jpg"); }
+body[data-page="checkout"] .page-banner.has-photo::after { background-image: url("../img/banners/checkout.jpg"); }
+.page-banner.has-photo::after { background-position: center center; }
+/* Inner banners on phones/tablets: photo shows clearly across the top, then fades into the text (like the home hero) */
+@media (max-width: 900px) {
+  .page-banner.has-photo { padding-top: clamp(225px, 62vw, 350px); }
+  .page-banner.has-photo::after {
+    top: 0; bottom: auto; height: clamp(250px, 68vw, 380px); width: 100%; opacity: 1;
+    -webkit-mask: linear-gradient(180deg, #000 50%, transparent 100%);
+            mask: linear-gradient(180deg, #000 50%, transparent 100%);
+    animation: bannerBgInM 1.6s cubic-bezier(.2,.7,.2,1) both, heroBgDrift 22s ease-in-out 1.6s infinite alternate;
+  }
+  @keyframes bannerBgInM { from { opacity: 0; transform: scale(1.1); } to { opacity: 1; transform: scale(1); } }
+}
+@media (max-width: 900px) { .hero::before { background-position: 45% 62%; } }
+@media (max-width: 900px) {
+  .hero::before { bottom: auto; height: 470px; background-position: 40% 55%;
+    -webkit-mask: linear-gradient(180deg, #000 60%, transparent 100%); mask: linear-gradient(180deg, #000 60%, transparent 100%); }
+}
+/* Home hero on phones: photo band on top, solid blush under the text (no photo behind the words) */
+@media (max-width: 900px) {
+  .hero-art { height: clamp(260px, 72vw, 340px); }
+  .hero::before { height: clamp(330px, 92vw, 430px); background-position: 45% 55%;
+    -webkit-mask: linear-gradient(180deg, #000 55%, transparent 100%); mask: linear-gradient(180deg, #000 55%, transparent 100%); }
+  .hero::after { background: linear-gradient(180deg, rgba(255,246,249,0) 0, rgba(255,246,249,0) clamp(200px, 55vw, 260px), #FFF6F9 clamp(320px, 88vw, 410px), #FFF6F9 100%); }
+}
+/* Blog + Contact: give the first section room below the banner's wave edge */
+body[data-page="blog"] .page-banner + section,
+body[data-page="contact"] .page-banner + section { padding-top: clamp(44px, 6vw, 84px) !important; }
+
+/* ---------- Quote requests (no prices, no cart) — 18 Nov 2026 ---------- */
+.quote-link { font-size: .74rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--wine); border-bottom: 1px solid currentColor; padding-bottom: 2px; }
+.quote-link:hover { color: var(--rose); }
+.quote-badge { display: inline-block; padding: 6px 14px; border-radius: 999px; background: var(--blush); color: var(--wine); font-size: .78rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; margin-right: 10px; }
+.pd-info .form-grid { margin-top: 4px; }
+
+/* ---------- Home hero: modern bakery interior (AI-generated with Magnific, 19 Nov 2026) ---------- */
+.hero::before { background-image: url("../img/hero-bakery.jpg?v=5"); background-position: 70% 55%; }
+@media (max-width: 900px) { .hero::before { background-position: 65% 50%; } }
+
+/* ---------- Footer: colourful social logos (icon only) ---------- */
+.socials { flex-wrap: wrap; gap: 10px; }
+.socials a { width: 42px; height: 42px; padding: 0; border: 0; border-radius: 50%;
+  display: grid; place-items: center; color: #fff;
+  box-shadow: 0 4px 14px rgba(0,0,0,.18); transition: transform .2s, filter .2s; }
+.socials a:hover { background-color: inherit; transform: translateY(-2px); filter: brightness(1.08); }
+.socials svg { width: 20px; height: 20px; }
+.socials .s-ig { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); }
+.socials .s-fb { background: #1877F2; }
+.socials .s-wa { background: #25D366; }
+
+/* ---------- Contact: map ---------- */
+.map-wrap { margin-top: 30px; border-radius: var(--radius-sm, 12px); overflow: hidden; box-shadow: 0 10px 30px rgba(123,20,20,.12); line-height: 0; }
+.map-wrap iframe { width: 100%; height: 320px; border: 0; }
+.map-note { font-size: .85rem; color: var(--muted); margin-top: 10px; }
+
+/* ---------- Gallery page: even grid (no ragged gaps at the end) ---------- */
+#galGrid.mosaic { columns: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+#galGrid.mosaic figure { margin: 0; aspect-ratio: 3 / 4; }
+#galGrid.mosaic img { height: 100%; object-fit: cover; }
+#galGrid.mosaic .spinner { grid-column: 1 / -1; }
+@media (max-width: 900px) { #galGrid.mosaic { grid-template-columns: repeat(2, 1fr); gap: 12px; } }

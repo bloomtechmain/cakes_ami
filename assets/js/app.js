@@ -9,7 +9,6 @@
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const money = n => "CA$" + (Math.round(n * 100) / 100).toFixed(2);
   const params = new URLSearchParams(location.search);
   const page = document.body.dataset.page;
 
@@ -50,10 +49,10 @@
 
   /* ---------- Header & footer ---------- */
   const NAV = [
-    ["index.html", "Home", "home"], ["shop.html", "Shop", "shop"], ["gallery.html", "Gallery", "gallery"], ["about.html", "About", "about"], ["blog.html", "Blog", "blog"],
+    ["index.html", "Home", "home"], ["shop.html", "Shop", "shop"], ["gallery.html", "Gallery", "gallery"], ["about.html", "About", "about"],
     ["contact.html", "Contact", "contact"]
   ];
-  const activeKey = { product: "shop", post: "blog", cart: "", checkout: "" }[page] ?? page;
+  const activeKey = { product: "shop", cart: "", checkout: "" }[page] ?? page;
   const tel = "tel:" + B.phone.replace(/[^\d+]/g, "");
 
   function renderChrome() {
@@ -70,7 +69,7 @@
     <ul>${NAV.map(([h, t, k]) => `<li><a href="${h}"${k === activeKey ? ' class="active" aria-current="page"' : ""}>${t}</a></li>`).join("")}</ul>
   </nav>
   <div class="nav-actions">
-    <a class="cart-btn" href="cart.html" aria-label="Shopping cart">${I.bag}<span class="cart-label">Cart</span><span class="cart-count" data-n="0">0</span></a>
+    <a class="cart-btn" href="contact.html#custom" aria-label="Get a free quote">${I.mail}<span class="cart-label">Get a free quote</span></a>
     <button class="icon-btn menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mainNav">${I.menu}</button>
   </div>
 </div></header>
@@ -78,9 +77,9 @@
     document.body.prepend(...header.childNodes);
 
     const socials = [
-      B.instagram && `<a href="${esc(B.instagram)}" target="_blank" rel="noopener" aria-label="Instagram">${I.insta}</a>`,
-      B.facebook && `<a href="${esc(B.facebook)}" target="_blank" rel="noopener" aria-label="Facebook">${I.fb}</a>`,
-      B.whatsapp && `<a href="https://wa.me/${esc(B.whatsapp)}" target="_blank" rel="noopener" aria-label="WhatsApp">${I.wa}</a>`
+      B.instagram && `<a href="${esc(B.instagram)}" target="_blank" rel="noopener" aria-label="Instagram" class="s-ig">${I.insta}</a>`,
+      B.facebook && `<a href="${esc(B.facebook)}" target="_blank" rel="noopener" aria-label="Facebook" class="s-fb">${I.fb}</a>`,
+      B.whatsapp && `<a href="https://wa.me/${esc(B.whatsapp)}" target="_blank" rel="noopener" aria-label="WhatsApp" class="s-wa">${I.wa}</a>`
     ].filter(Boolean).join("");
 
     const footer = document.createElement("footer");
@@ -94,11 +93,11 @@
       ${socials ? `<div class="socials">${socials}</div>` : ""}
     </div>
     <div><h4>Explore</h4><ul>
-      <li><a href="shop.html">Shop cakes</a></li><li><a href="gallery.html">Gallery</a></li><li><a href="about.html">Our story</a></li><li><a href="blog.html">Blog</a></li><li><a href="contact.html">Contact us</a></li>
+      <li><a href="shop.html">Shop cakes</a></li><li><a href="gallery.html">Gallery</a></li><li><a href="about.html">Our story</a></li><li><a href="contact.html">Contact us</a></li>
     </ul></div>
     <div><h4>Help</h4><ul>
-      <li><a href="contact.html#custom">Custom order</a></li>
-      <li><a href="cart.html">Your cart</a></li><li><a href="contact.html#faq">FAQ</a></li>
+      <li><a href="contact.html#custom">Request a quote</a></li>
+      <li><a href="contact.html#faq">FAQ</a></li>
     </ul></div>
     <div><h4>Say hello</h4><ul>
       <li><a href="${tel}">${esc(B.phone)}</a></li>
@@ -184,34 +183,12 @@
     return Promise.resolve("mailto");
   }
 
-  /* ---------- Cart ---------- */
-  const CART_KEY = "cakesami_cart";
-  const cart = {
-    items() { return store.get(CART_KEY, []); },
-    save(items) { store.set(CART_KEY, items); updateCount(); },
-    add(item) {
-      const items = this.items();
-      const same = items.find(i => i.key === item.key);
-      if (same) same.qty = Math.min(20, same.qty + item.qty); else items.push(item);
-      this.save(items);
-    },
-    count() { return this.items().reduce((n, i) => n + i.qty, 0); },
-    total() { return this.items().reduce((n, i) => n + i.qty * i.unit, 0); },
-    clear() { this.save([]); }
-  };
-  function updateCount() { $$(".cart-count").forEach(el => { const n = cart.count(); el.textContent = n; el.dataset.n = n; }); }
-
+  /* ---------- Products (no prices: every cake is quoted on request) ---------- */
   const byId = id => D.products.find(p => p.id === id);
   const catName = id => (D.categories.find(c => c.id === id) || {}).name || "";
   const sizeList = p => D.SIZES[p.size];
-  const unitPrice = (p, sizeId) => {
-    const s = sizeList(p).find(x => x.id === sizeId) || sizeList(p)[0];
-    return s.mult ? Math.round(p.price * s.mult) : p.price + s.add;
-  };
-  const fromLabel = p => p.size === "cupcake" ? "dozen" : "from";
 
   function productCard(p) {
-    const display = p.size === "cupcake" ? p.price : p.price;
     return `<article class="p-card reveal">
   <a class="p-img" href="product.html?id=${p.id}">
     <img src="${p.images[0]}" alt="${esc(p.name)}" loading="lazy">
@@ -221,8 +198,8 @@
     <span class="p-cat">${esc(catName(p.category))}</span>
     <h3><a href="product.html?id=${p.id}">${esc(p.name)}</a></h3>
     <div class="p-foot">
-      <span class="price"><small>${fromLabel(p)}</small>${money(display)}</span>
-      <a class="icon-btn" href="product.html?id=${p.id}" aria-label="Choose options for ${esc(p.name)}">${I.plus}</a>
+      <a class="quote-link" href="product.html?id=${p.id}#quote">Request a quote</a>
+      <a class="icon-btn" href="product.html?id=${p.id}" aria-label="View ${esc(p.name)}">${I.plus}</a>
     </div>
   </div>
 </article>`;
@@ -292,7 +269,7 @@
   <h3>${esc(c.name)}</h3><span>${D.products.filter(p => p.category === c.id).length} designs</span>
 </a>`).join("");
     const feat = $("#homeFeatured");
-    if (feat) feat.innerHTML = ["wildflower-naked", "blue-rose-cascade", "dino-jungle", "tea-party-teapot", "pink-rose-cupcakes", "pastel-roses-gold", "garden-bouquet-cupcakes", "golden-crown"].map(id => productCard(byId(id))).join("");
+    if (feat) feat.innerHTML = ["rose-basket", "garden-rose-tiers", "little-shark", "tea-party-teapot", "rose-swirl-cupcakes", "maple-citizenship", "teddy-tiers", "glam-makeup"].map(id => productCard(byId(id))).join("");
     const m = $("#homeMosaic");
     if (m) mosaic(m, D.portfolio.slice(0, 8));
   };
@@ -305,8 +282,6 @@
     const draw = () => {
       const term = q.value.trim().toLowerCase();
       let list = D.products.filter(p => (cat === "all" || p.category === cat) && (!term || (p.name + " " + p.description + " " + catName(p.category)).toLowerCase().includes(term)));
-      if (sort.value === "low") list = list.slice().sort((a, b) => a.price - b.price);
-      if (sort.value === "high") list = list.slice().sort((a, b) => b.price - a.price);
       if (sort.value === "name") list = list.slice().sort((a, b) => a.name.localeCompare(b.name));
       countEl.textContent = `${list.length} ${list.length === 1 ? "design" : "designs"}`;
       grid.innerHTML = list.length ? list.map(productCard).join("") :
@@ -332,17 +307,19 @@
     $("#crumbName").textContent = p.name;
     const sizes = sizeList(p);
     const isCup = p.size === "cupcake";
+    const minDate = new Date(); minDate.setDate(minDate.getDate() + C.leadTimeDays);
     root.innerHTML = `
 <div class="pd-grid">
   <div class="pd-media">
     <div class="pd-main"><img id="pdMain" src="${p.images[0]}" alt="${esc(p.name)}"></div>
     ${p.images.length > 1 ? `<div class="pd-thumbs">${p.images.map((s, i) => `<button type="button" class="${i ? "" : "active"}" data-src="${s}" aria-label="View photo ${i + 1}"><img src="${s}" alt=""></button>`).join("")}</div>` : ""}
   </div>
-  <form class="pd-info" id="pdForm">
+  <form class="pd-info" id="pdForm" novalidate>
     <span class="eyebrow">${esc(catName(p.category))}</span>
     <h1 style="font-size:clamp(2.2rem,4.5vw,3.4rem)">${esc(p.name)}</h1>
-    <p><span class="price" id="pdPrice">${money(unitPrice(p, sizes[isCup ? 1 : 0].id))}</span><span class="serves" id="pdServes"></span></p>
+    <p><span class="quote-badge">Price on request</span><span class="serves" id="pdServes"></span></p>
     <p class="lead" style="font-size:1.05rem">${esc(p.description)}</p>
+    <span id="quote"></span>
     <div class="opt"><span class="opt-label">${isCup ? "Quantity" : "Size"}</span>
       <div class="opt-row" role="radiogroup">${sizes.map((s, i) => `<input type="radio" name="size" id="sz${s.id}" value="${s.id}" ${i === (isCup ? 1 : 0) ? "checked" : ""}><label for="sz${s.id}">${s.label}<small>${s.note}</small></label>`).join("")}</div>
     </div>
@@ -351,191 +328,50 @@
     </div>
     <div class="opt field"><label for="pdMsg">${isCup ? "Colour or theme notes" : "Message on cake"} <span class="muted" style="text-transform:none;letter-spacing:0">(optional)</span></label>
       <input id="pdMsg" maxlength="60" placeholder="${isCup ? "e.g. pink & gold for a shower" : "e.g. Happy 30th Sarah"}"></div>
-    <div class="buy-row">
-      <div class="qty"><button type="button" data-d="-1" aria-label="Decrease quantity">−</button><input id="pdQty" type="number" min="1" max="20" value="1" aria-label="Quantity"><button type="button" data-d="1" aria-label="Increase quantity">+</button></div>
-      <button class="btn" type="submit">${I.bag} Add to cart</button>
+    <div class="opt"><span class="opt-label">Your details</span>
+      <div class="form-grid">
+        <div class="field"><label for="qName">Name <span class="req">*</span></label><input id="qName" name="qname" autocomplete="name" required></div>
+        <div class="field"><label for="qEmail">Email <span class="req">*</span></label><input id="qEmail" name="qemail" type="email" autocomplete="email" required></div>
+        <div class="field"><label for="qPhone">Phone</label><input id="qPhone" name="qphone" type="tel" autocomplete="tel"></div>
+        <div class="field"><label for="qDate">Date needed</label><input id="qDate" name="qdate" type="date" min="${isoDate(minDate)}"></div>
+        <div class="field full"><label for="qNotes">Anything else?</label><textarea id="qNotes" name="qnotes" placeholder="Colours, design changes, allergies, number of guests"></textarea></div>
+      </div>
     </div>
-    <div class="note-box">${I.info}<div>Order at least <strong>${C.leadTimeDays} days</strong> ahead (1–2 weeks for themed and sculpted designs). Pickup only. Want to change colours or the design? Add notes at checkout or <a href="contact.html#custom">request a custom quote</a>.</div></div>
+    <input class="hp" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <div class="buy-row"><button class="btn" type="submit">${I.mail} Request a quote</button></div>
+    <div class="form-msg" id="qMsg" role="alert"></div>
+    <div class="note-box">${I.info}<div>Every cake is made to order, so we'll reply with a personal quote. Please ask at least <strong>${C.leadTimeDays} days</strong> ahead (1–2 weeks for themed and sculpted designs). Pickup only.</div></div>
   </form>
 </div>`;
     $$(".pd-thumbs button").forEach(b => b.addEventListener("click", () => { $("#pdMain").src = b.dataset.src; $$(".pd-thumbs button").forEach(x => x.classList.toggle("active", x === b)); }));
-    const form = $("#pdForm"), qty = $("#pdQty");
-    const upd = () => { const sid = form.size.value; $("#pdPrice").textContent = money(unitPrice(p, sid)); const s = sizes.find(x => x.id === sid); $("#pdServes").textContent = "· " + s.note; };
+    const form = $("#pdForm"), out = $("#qMsg");
+    const upd = () => { const s = sizes.find(x => x.id === form.size.value); $("#pdServes").textContent = s.note; };
     form.addEventListener("change", upd); upd();
-    $$(".qty button", form).forEach(b => b.addEventListener("click", () => { qty.value = Math.max(1, Math.min(20, (+qty.value || 1) + +b.dataset.d)); }));
+    if (location.hash === "#quote") setTimeout(() => $("#qName").scrollIntoView({ behavior: "smooth", block: "center" }), 150);
     form.addEventListener("submit", e => {
       e.preventDefault();
-      const sid = form.size.value, s = sizes.find(x => x.id === sid), fl = form.flavour.value, msg = $("#pdMsg").value.trim();
-      const n = Math.max(1, Math.min(20, parseInt(qty.value, 10) || 1));
-      cart.add({ key: [p.id, sid, fl, msg].join("|"), id: p.id, name: p.name, img: p.images[0], size: s.label + " (" + s.note + ")", flavour: fl, message: msg, unit: unitPrice(p, sid), qty: n });
-      showToast(`Added to your cart <a href="cart.html">View cart →</a>`);
+      if (form.company.value) return; // bot
+      const bad = $$("[required]", form).find(f => !f.value.trim() || (f.type === "email" && !/^\S+@\S+\.\S+$/.test(f.value)));
+      if (bad) { out.className = "form-msg err show"; out.textContent = "Please add your name and a valid email."; bad.focus(); return; }
+      const s = sizes.find(x => x.id === form.size.value), fl = form.flavour.value, cakeMsg = $("#pdMsg").value.trim();
+      const name = form.qname.value.trim(), email = form.qemail.value.trim(), phone = form.qphone.value.trim() || "-", date = form.qdate.value || "-";
+      const details = [`Cake: ${p.name}`, `${isCup ? "Quantity" : "Size"}: ${s.label} (${s.note})`, `Flavour: ${fl}`, cakeMsg && `${isCup ? "Theme" : "Message on cake"}: ${cakeMsg}`, form.qnotes.value.trim() && `Notes: ${form.qnotes.value.trim()}`].filter(Boolean).join("\n");
+      const data = { Name: name, Email: email, Phone: phone, Cake: p.name, "Date needed": date, Details: "\n" + details };
+      const prm = { from_name: name, reply_to: email, phone, occasion: `Quote request: ${p.name}`, date_needed: date, guests: s.label + " (" + s.note + ")", enquiry: details };
+      const btn = $("button[type=submit]", form); btn.disabled = true;
+      sendForm("contact", `Quote request: ${p.name} (${name})`, data, prm).then(mode => {
+        out.className = "form-msg ok show";
+        out.textContent = mode === "mailto" ? "Your email app has opened with your request. Just press send!" : "Thank you! We'll reply with your quote within one business day.";
+        if (mode !== "mailto") form.reset(), upd();
+      }).catch(() => { out.className = "form-msg err show"; out.textContent = `Something went wrong. Please call us on ${B.phone}.`; })
+        .finally(() => { btn.disabled = false; });
     });
     const rel = $("#related");
     if (rel) rel.innerHTML = D.products.filter(x => x.category === p.category && x.id !== p.id).slice(0, 4).map(productCard).join("");
     reveal();
   };
 
-  function lineHTML(i) {
-    return `${esc(i.size)} · ${esc(i.flavour)}${i.message ? `<br>“${esc(i.message)}”` : ""}`;
-  }
-
-  pages.cart = () => {
-    const root = $("#cartRoot");
-    const draw = () => {
-      const items = cart.items();
-      if (!items.length) {
-        root.innerHTML = `<div class="empty card"><h3>Your cart is empty</h3><p>Let's find something sweet.</p><a class="btn" href="shop.html">Browse cakes</a></div>`;
-        return;
-      }
-      root.innerHTML = `
-<div class="cart-layout">
-  <div class="card">
-    ${items.map((i, k) => `
-    <div class="cart-item">
-      <a href="product.html?id=${esc(i.id)}"><img src="${esc(i.img)}" alt="${esc(i.name)}"></a>
-      <div><h3><a href="product.html?id=${esc(i.id)}">${esc(i.name)}</a></h3><div class="ci-opts">${lineHTML(i)}</div><div class="ci-opts">${money(i.unit)} each</div></div>
-      <div class="ci-right">
-        <div class="qty"><button type="button" data-k="${k}" data-d="-1" aria-label="Decrease">−</button><input type="number" value="${i.qty}" min="1" max="20" data-k="${k}" aria-label="Quantity for ${esc(i.name)}"><button type="button" data-k="${k}" data-d="1" aria-label="Increase">+</button></div>
-        <span class="price">${money(i.unit * i.qty)}</span>
-        <button class="remove" type="button" data-rm="${k}">Remove</button>
-      </div>
-    </div>`).join("")}
-  </div>
-  <aside class="card summary">
-    <h3>Order summary</h3>
-    <div class="sum-row"><span>Subtotal</span><span>${money(cart.total())}</span></div>
-    <div class="sum-row"><span>Pickup</span><span>Free</span></div>
-    <div class="sum-row total"><span>Total</span><span>${money(cart.total())}</span></div>
-    <p class="muted" style="font-size:.88rem;margin:14px 0 20px">Pay by Interac e-Transfer after you place your order: a ${C.etransfer.depositPercent}% deposit or the full amount.</p>
-    <a class="btn block" href="checkout.html">Proceed to checkout</a>
-    <p class="center" style="margin:14px 0 0"><a class="link-arrow" href="shop.html">Continue shopping</a></p>
-  </aside>
-</div>`;
-    };
-    root.addEventListener("click", e => {
-      const items = cart.items();
-      const d = e.target.closest("[data-d]"), rm = e.target.closest("[data-rm]");
-      if (d) { const it = items[+d.dataset.k]; it.qty = Math.max(1, Math.min(20, it.qty + +d.dataset.d)); cart.save(items); draw(); }
-      if (rm) { items.splice(+rm.dataset.rm, 1); cart.save(items); draw(); }
-    });
-    root.addEventListener("change", e => {
-      if (!e.target.matches("input[data-k]")) return;
-      const items = cart.items(); items[+e.target.dataset.k].qty = Math.max(1, Math.min(20, parseInt(e.target.value, 10) || 1)); cart.save(items); draw();
-    });
-    draw();
-  };
-
   const isoDate = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  function newOrderId() {
-    const d = new Date(), chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let r = ""; for (let i = 0; i < 4; i++) r += chars[Math.floor(Math.random() * chars.length)];
-    return `CA-${String(d.getFullYear()).slice(2)}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}-${r}`;
-  }
-
-  pages.checkout = () => {
-    const items = cart.items();
-    const root = $("#checkoutRoot");
-    if (!items.length) { root.innerHTML = `<div class="empty card"><h3>Your cart is empty</h3><p>Add a cake before checking out.</p><a class="btn" href="shop.html">Browse cakes</a></div>`; return; }
-    const minDate = new Date(); minDate.setDate(minDate.getDate() + C.leadTimeDays);
-    const total = cart.total();
-    root.innerHTML = `
-<form class="cart-layout" id="coForm" novalidate>
-  <div class="card">
-    <h3>Your details</h3>
-    <div class="form-grid">
-      <div class="field"><label for="coFirst">First name <span class="req">*</span></label><input id="coFirst" name="first" autocomplete="given-name" required></div>
-      <div class="field"><label for="coLast">Last name <span class="req">*</span></label><input id="coLast" name="last" autocomplete="family-name" required></div>
-      <div class="field"><label for="coEmail">Email <span class="req">*</span></label><input id="coEmail" name="email" type="email" autocomplete="email" required></div>
-      <div class="field"><label for="coPhone">Mobile <span class="req">*</span></label><input id="coPhone" name="phone" type="tel" autocomplete="tel" required></div>
-    </div>
-    <h3 style="margin-top:34px">Pickup</h3>
-    <div class="form-grid">
-      <div class="field"><label for="coDate">Pickup date <span class="req">*</span></label><input id="coDate" name="date" type="date" min="${isoDate(minDate)}" required><div class="hint">Earliest available: ${minDate.toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" })}</div></div>
-      <div class="field"><label for="coTime">Preferred time</label><select id="coTime" name="time"><option>Morning (9am–12pm)</option><option>Afternoon (12–4pm)</option><option>Evening (4–7pm)</option></select></div>
-      <div class="field full"><label for="coNotes">Order notes</label><textarea id="coNotes" name="notes" placeholder="Colours, design changes, allergies, anything we should know"></textarea></div>
-    </div>
-    <p class="muted" style="font-size:.9rem;margin:16px 0 0">${esc(B.pickupNote)}</p>
-    <h3 style="margin-top:34px">Payment</h3>
-    <div class="pay-opts">
-      <label class="pay-opt"><input type="radio" name="pay" value="deposit" checked><div><strong>Interac e-Transfer: ${C.etransfer.depositPercent}% deposit</strong><span>Pay ${money(total * C.etransfer.depositPercent / 100)} now to reserve your date, and the balance at pickup.</span></div></label>
-      <label class="pay-opt"><input type="radio" name="pay" value="full"><div><strong>Interac e-Transfer: pay in full</strong><span>Pay ${money(total)} now and you're all set.</span></div></label>
-    </div>
-    <input class="hp" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">
-  </div>
-  <aside class="card summary">
-    <h3>Your order</h3>
-    ${items.map(i => `<div class="sum-line"><img src="${esc(i.img)}" alt=""><div><strong style="font-weight:500">${esc(i.name)}</strong> × ${i.qty}<small>${lineHTML(i)}</small></div><span>${money(i.unit * i.qty)}</span></div>`).join("")}
-    <div class="sum-row total"><span>Total</span><span>${money(total)}</span></div>
-    <button class="btn block" type="submit" style="margin-top:18px">Place order</button>
-    <div class="form-msg" id="coMsg" role="alert"></div>
-    <p class="muted" style="font-size:.84rem;margin:14px 0 0">We'll confirm your order by email or phone. Your date is held once your e-Transfer arrives.</p>
-  </aside>
-</form>`;
-    const form = $("#coForm"), msg = $("#coMsg");
-    form.addEventListener("submit", e => {
-      e.preventDefault();
-      if (form.company.value) return; // bot
-      const bad = $$("[required]", form).find(f => !f.value.trim() || (f.type === "email" && !/^\S+@\S+\.\S+$/.test(f.value)));
-      if (bad) { msg.className = "form-msg err show"; msg.textContent = "Please fill in the highlighted fields."; bad.focus(); bad.style.borderColor = "var(--cherry)"; return; }
-      if (form.date.value < form.date.min) { msg.className = "form-msg err show"; msg.textContent = `Please choose a pickup date on or after ${form.date.min}.`; form.date.focus(); return; }
-      const id = newOrderId();
-      const due = form.pay.value === "full" ? total : total * C.etransfer.depositPercent / 100;
-      const order = {
-        id, created: new Date().toISOString(), status: "Received",
-        name: form.first.value.trim() + " " + form.last.value.trim(), email: form.email.value.trim(), phone: form.phone.value.trim(),
-        pickupDate: form.date.value, pickupTime: form.time.value, notes: form.notes.value.trim(),
-        payment: form.pay.value, total, due, items
-      };
-      const lines = items.map(i => `• ${i.qty} × ${i.name}: ${i.size}, ${i.flavour}${i.message ? `, message "${i.message}"` : ""} = ${money(i.unit * i.qty)}`).join("\n");
-      const payload = {
-        "Order ID": id, Name: order.name, Email: order.email, Phone: order.phone,
-        "Pickup": `${order.pickupDate}, ${order.pickupTime}`, Items: "\n" + lines, Total: money(total),
-        Payment: `${form.pay.value === "full" ? "Full" : C.etransfer.depositPercent + "% deposit"}: ${money(due)} by e-Transfer`, Notes: order.notes || "-"
-      };
-      const btn = $("button[type=submit]", form); btn.disabled = true; btn.textContent = "Placing order…";
-      const params = {
-        order_id: id, customer_name: order.name, customer_email: order.email, customer_phone: order.phone, reply_to: order.email,
-        pickup_date: new Date(order.pickupDate + "T12:00").toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric", year: "numeric" }),
-        pickup_time: order.pickupTime, items: lines, total: money(total), amount_due: money(due), balance: money(total - due),
-        payment: form.pay.value === "full" ? "Paid in full by e-Transfer" : `${C.etransfer.depositPercent}% deposit by e-Transfer`,
-        etransfer_email: C.etransfer.email, notes: order.notes || "-"
-      };
-      sendForm("order", `New cake order ${id}`, payload, params).then(mode => {
-        const orders = store.get("cakesami_orders", []); orders.unshift(order); store.set("cakesami_orders", orders.slice(0, 20));
-        cart.clear();
-        renderConfirmation(order, mode);
-      }).catch(() => {
-        btn.disabled = false; btn.textContent = "Place order";
-        msg.className = "form-msg err show"; msg.innerHTML = `Sorry, we couldn't send your order. Please try again or call <a href="${tel}">${esc(B.phone)}</a>.`;
-      });
-    });
-  };
-
-  function renderConfirmation(o, mode) {
-    $("#pageBannerTitle") && ($("#pageBannerTitle").textContent = "Thank you!");
-    $("#checkoutRoot").innerHTML = `
-<div class="confirm card">
-  <div class="tick">${I.check}</div>
-  <h2>Your order is in!</h2>
-  <p class="lead">Your order number is</p>
-  <div class="order-id">${esc(o.id)}</div>
-  <p>${mode === "mailto" ? "Your email app has opened with your order details. <strong>Please press send</strong> so it reaches us." : "We've received your order and will be in touch shortly to confirm."}</p>
-  <div class="pay-box">
-    <h3 style="margin-bottom:14px">Pay by Interac e-Transfer</h3>
-    <dl>
-      <dt>Send to</dt><dd>${esc(C.etransfer.email)}</dd>
-      <dt>Amount</dt><dd>${money(o.due)} ${o.payment === "full" ? "(paid in full)" : `(${C.etransfer.depositPercent}% deposit, balance ${money(o.total - o.due)} at pickup)`}</dd>
-      <dt>Message</dt><dd>${esc(o.id)}</dd>
-      <dt>Pickup</dt><dd>${new Date(o.pickupDate + "T12:00").toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric" })}, ${esc(o.pickupTime)}</dd>
-    </dl>
-  </div>
-  <div class="hero-cta" style="justify-content:center">
-    <a class="btn" href="index.html">Back home</a>
-  </div>
-</div>`;
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
   /* ---------- Order tracking ---------- */
   const STEPS = [["Received", I.check], ["Confirmed", I.card], ["Baking", I.oven], ["Ready", I.box], ["Completed", I.heart]];
   function parseCSV(text) {
@@ -597,18 +433,18 @@
     }
   };
 
-  /* ---------- Gallery: Google Drive when configured, otherwise local photos with filters ---------- */
+  /* ---------- Gallery: Google Drive photos first, then the local photos (no repeats) ---------- */
   pages.gallery = () => {
     const grid = $("#galGrid"), status = $("#galStatus"), chips = $("#galFilters");
     const g = C.googleDrive || {};
-    const fallback = () => {
+    const local = (extra = []) => {
       const used = D.categories.filter(c => D.portfolio.some(p => p.category === c.id));
       chips.innerHTML = [{ id: "all", name: "All work" }].concat(used).map((c, i) => `<button class="chip${i ? "" : " active"}" type="button" data-cat="${c.id}" aria-pressed="${!i}">${esc(c.name)}</button>`).join("");
-      const draw = cat => mosaic(grid, D.portfolio.filter(p => cat === "all" || p.category === cat));
+      const draw = cat => mosaic(grid, cat === "all" ? extra.concat(D.portfolio) : D.portfolio.filter(p => p.category === cat));
       chips.onclick = e => { const b = e.target.closest(".chip"); if (!b) return; $$(".chip", chips).forEach(c => { c.classList.toggle("active", c === b); c.setAttribute("aria-pressed", c === b); }); draw(b.dataset.cat); };
       draw("all");
     };
-    if (!g.apiKey || !g.folderId) { fallback(); return; }
+    if (!g.apiKey || !g.folderId) { local(); return; }
     grid.innerHTML = '<div class="spinner" aria-label="Loading photos"></div>';
     const all = [];
     const load = token => {
@@ -620,39 +456,18 @@
       });
     };
     load().then(files => {
-      if (!files.length) { fallback(); return; }
       const key = encodeURIComponent(g.apiKey);
-      mosaic(grid, files.map(f => {
+      const drive = files.map(f => {
         const srcs = [
           f.thumbnailLink && f.thumbnailLink.replace(/=s\d+$/, "=s1200"),
           `https://lh3.googleusercontent.com/d/${f.id}=w1200`,
           `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&key=${key}`
         ].filter(Boolean);
         return { src: srcs[0], fallbacks: srcs.slice(1), title: f.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ") };
-      }));
+      });
+      local(drive);
       if (status) status.textContent = "";
-    }).catch(() => { fallback(); });
-  };
-
-  /* ---------- Blog ---------- */
-  const fmtDate = s => new Date(s + "T12:00").toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" });
-  const blogCard = p => `
-<a class="b-card reveal" href="post.html?slug=${p.slug}">
-  <div class="b-img">${p.images.map(i => `<img src="${D.IMG + i}.jpg" alt="" loading="lazy">`).join("")}</div>
-  <div class="b-body"><span class="b-meta">${fmtDate(p.date)} · ${p.read}</span><h3>${esc(p.title)}</h3><p>${esc(p.excerpt)}</p><span class="link-arrow">Read article</span></div>
-</a>`;
-  pages.blog = () => { $("#blogGrid").innerHTML = D.posts.map(blogCard).join(""); reveal(); };
-  pages.post = () => {
-    const p = D.posts.find(x => x.slug === params.get("slug"));
-    const root = $("#postRoot");
-    if (!p) { root.innerHTML = `<div class="empty"><h3>Article not found</h3><a class="btn" href="blog.html">All articles</a></div>`; return; }
-    document.title = `${p.title} | ${B.name}`;
-    $("#postTitle").textContent = p.title;
-    $("#postMeta").textContent = `${fmtDate(p.date)} · ${p.read}`;
-    root.innerHTML = `<div class="article-hero">${p.images.map(i => `<img src="${D.IMG + i}.jpg" alt="">`).join("")}</div><div class="article">${p.body}</div>
-<div class="note-box" style="margin-top:40px">${I.cake}<div>Ready to order? <a href="shop.html">Browse the shop</a> or <a href="contact.html#custom">request a custom cake</a>.</div></div>`;
-    const more = $("#morePosts"); if (more) more.innerHTML = D.posts.filter(x => x !== p).map(blogCard).join("");
-    reveal();
+    }).catch(() => local());
   };
 
   /* ---------- Contact ---------- */
@@ -689,10 +504,9 @@
 
   /* ---------- Banner photo row on inner pages ---------- */
   const BANNER = {
-    about: ["naked-daisy", "golden-crown", "cupcakes-pink-rose"], shop: ["pastel-rose-gold", "blue-rose-tier", "cupcakes-garden"],
-    gallery: ["teapot", "fiftieth-silver", "dino-jungle"], blog: ["naked-floral", "teddy-tiers", "cupcakes-eucalyptus"],
-    contact: ["bride-to-be", "leaf-frangipani", "princess-crown"], track: ["cupcakes-swirl", "bow-blossom", "cupcakes-floral"],
-    cart: ["cupcakes-pink-rose", "pastel-rose-gold", "cupcakes-garden"], checkout: ["cupcakes-eucalyptus", "blue-rose-tier", "cupcakes-floral"]
+    about: ["red-rose-bouquet", "woodland-fox", "rose-cupcakes"], shop: ["rose-basket", "garden-rose-tiers", "rose-cupcakes"],
+    gallery: ["teapot", "silver-jubilee", "little-shark"],
+    contact: ["bride-to-be", "frangipani-leaf", "glam-makeup"], track: ["dessert-cups", "dapper-shirt", "rose-cupcakes"]
   };
   function bannerPhotos() {
     const b = $(".page-banner .container"), imgs = BANNER[page];
@@ -701,18 +515,14 @@
     const txt = document.createElement("div"); txt.className = "banner-text";
     while (b.firstChild) txt.append(b.firstChild);
     b.append(txt);
-    const row = document.createElement("div");
-    row.className = "banner-photos"; row.setAttribute("aria-hidden", "true");
-    row.innerHTML = imgs.map(i => `<div class="arch"><img src="${D.IMG + i}.jpg" alt=""></div>`).join("");
-    b.append(row);
+    // the photo itself is a faded CSS backdrop (.page-banner.has-photo::after); no arch photos here any more
+    b.closest(".page-banner").classList.add("has-photo");
   }
 
   /* ---------- Boot ---------- */
   renderChrome();
   fillBusiness();
   bannerPhotos();
-  updateCount();
   if (pages[page]) pages[page]();
   reveal();
-  window.addEventListener("storage", updateCount);
 })();

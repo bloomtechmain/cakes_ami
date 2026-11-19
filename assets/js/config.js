@@ -53,10 +53,10 @@ window.CA_CONFIG = {
      2) Copy the folder ID from its URL: drive.google.com/drive/folders/<THIS_PART>
      3) Create an API key at console.cloud.google.com (enable "Google Drive API"),
         restrict it to your website domain.
-     Until both are filled in, the gallery shows the photos stored in /assets/img/cakes. */
+     Until both are filled in, the gallery shows the product photos in /assets/img/products. */
   googleDrive: {
-    apiKey: "AIzaSyD-LedwYxekX4-zkloB76VxUb2EbxRLNfw",
-    folderId: "1G-AzH1ik3IUYQ3eIWIGcMc3xwOdtzdXy"
+    apiKey: "AIzaSyBC2PQqJA0_jzRwRMxgGSZu2PklaBzp5g4",
+    folderId: "1gHPdB1YG1pxNlMRkxgH8zAKBjk2i9f5L"
   },
 
   /* ---------- Order tracking: Google Sheet ----------

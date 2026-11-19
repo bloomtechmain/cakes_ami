@@ -1,0 +1,4 @@
+# Raw source photos (not used by the website)
+WhatsApp Image *.jpeg
+*.zip
+_incoming/

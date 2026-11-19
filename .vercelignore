@@ -1,0 +1,5 @@
+# Internal notes and parked pages: not part of the public website
+_parked
+*.md
+_incoming/
+*.zip
