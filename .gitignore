@@ -2,3 +2,6 @@
 WhatsApp Image *.jpeg
 *.zip
 _incoming/
+
+# Notes and work logs (kept locally only)
+*.md
