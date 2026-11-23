@@ -31,12 +31,12 @@ window.CA_CONFIG = {
      Paste your IDs from https://dashboard.emailjs.com — see EMAILJS-SETUP.md for the templates.
      When publicKey + serviceId + a template are filled in, that form sends through EmailJS. */
   emailjs: {
-    publicKey: "",          // Account → General → Public Key
-    serviceId: "",          // Email Services → Service ID   (e.g. "service_abc123")
+    publicKey: "uSLDqzCpvgQJgXPts",          // Account → General → Public Key
+    serviceId: "service_fvywskq",          // Email Services → Service ID   (e.g. "service_abc123")
     templates: {
       order: "",            // new order → sent to the owner                   (e.g. "template_order")
       orderCustomer: "",    // OPTIONAL order confirmation → sent to customer
-      contact: "",          // contact / custom-cake enquiry → owner
+      contact: "template_m93es5l",          // contact / custom-cake enquiry → owner
       newsletter: ""        // OPTIONAL newsletter sign-up → owner
     }
   },
