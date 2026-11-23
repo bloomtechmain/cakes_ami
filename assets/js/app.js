@@ -103,12 +103,7 @@
       <li><a href="${tel}">${esc(B.phone)}</a></li>
       <li><a href="mailto:${esc(B.email)}">${esc(B.email)}</a></li>
       <li>${esc(B.area)}</li>
-    </ul>
-    <form class="newsletter" id="newsletter" novalidate>
-      <label class="sr-only" for="nlEmail">Email address</label>
-      <input id="nlEmail" type="email" placeholder="Your email for sweet news" required>
-      <button type="submit">Join</button>
-    </form></div>
+    </ul></div>
   </div>
   <div class="footer-bottom">
     <span>© ${new Date().getFullYear()} ${esc(B.name)}. All rights reserved.</span>
@@ -133,13 +128,6 @@
     const hdr = $("#siteHeader");
     const onScroll = () => hdr.classList.toggle("scrolled", window.scrollY > 10);
     window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
-
-    $("#newsletter").addEventListener("submit", e => {
-      e.preventDefault();
-      const v = $("#nlEmail").value.trim();
-      if (!/^\S+@\S+\.\S+$/.test(v)) { showToast("Please enter a valid email address."); return; }
-      sendForm("newsletter", "Newsletter sign-up", { Email: v }, { subscriber_email: v, reply_to: v }, true).then(() => { $("#nlEmail").value = ""; showToast("Thank you! You're on the list."); });
-    });
   }
 
   let toastTimer;
@@ -170,7 +158,6 @@
       if (kind === "order" && EJ.templates.orderCustomer && all.customer_email) main.then(() => emailjsSend(EJ.templates.orderCustomer, all)).catch(() => {});
       return main;
     }
-    if (emailjsReady() && kind === "newsletter") return Promise.resolve("local"); // no newsletter template set
     if (C.formEndpoint) {
       return fetch(C.formEndpoint, {
         method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" },
