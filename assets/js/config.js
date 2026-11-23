@@ -8,7 +8,7 @@ window.CA_CONFIG = {
     name: "Cakes Ami",
     tagline: "Baked with love, served with joy",
     phone: "604-250-9441",
-    email: "glaperera2@gmail.com",
+    email: "cakesami@outlook.com",
     area: "Greater Vancouver, BC",          // shown in the footer / contact page
     pickupNote: "Pickup only — exact pickup address is shared once your order is confirmed.",
     hours: "Orders by appointment · Mon–Sun",
