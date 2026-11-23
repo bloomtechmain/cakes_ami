@@ -23,7 +23,7 @@ window.CA_CONFIG = {
 
   /* ---------- Payments (Interac e-Transfer) ---------- */
   etransfer: {
-    email: "glaperera2@gmail.com",
+    email: "cakesami@outlook.com",
     depositPercent: 50
   },
 
