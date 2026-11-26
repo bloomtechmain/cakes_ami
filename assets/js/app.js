@@ -294,7 +294,8 @@
     $("#crumbName").textContent = p.name;
     const sizes = sizeList(p);
     const isCup = p.size === "cupcake";
-    const minDate = new Date(); minDate.setDate(minDate.getDate() + C.leadTimeDays);
+    const minDate = new Date(); minDate.setDate(minDate.getDate() + 1);   // only past days and today are locked
+    const FLAV_COLOURS = { "Vanilla Bean": "#F3E3B5", "Rich Chocolate": "#5B3426", "Red Velvet": "#A3202C", "Lemon": "#F6D84C", "Strawberry": "#F08AA0", "Marble": "linear-gradient(135deg,#F3E3B5 50%,#5B3426 50%)" };
     root.innerHTML = `
 <div class="pd-grid">
   <div class="pd-media">
@@ -307,11 +308,12 @@
     <p><span class="quote-badge">Price on request</span><span class="serves" id="pdServes"></span></p>
     <p class="lead" style="font-size:1.05rem">${esc(p.description)}</p>
     <span id="quote"></span>
-    <div class="opt"><span class="opt-label">${isCup ? "Quantity" : "Size"}</span>
-      <div class="opt-row" role="radiogroup">${sizes.map((s, i) => `<input type="radio" name="size" id="sz${s.id}" value="${s.id}" ${i === (isCup ? 1 : 0) ? "checked" : ""}><label for="sz${s.id}">${s.label}<small>${s.note}</small></label>`).join("")}</div>
+    <div class="opt"><span class="opt-label">${isCup ? "Quantity" : "Size"} <span class="req">*</span></span>
+      <div class="opt-row sizes" role="radiogroup">${sizes.map((s, i) => `<input type="radio" name="size" id="sz${s.id}" value="${s.id}"><label for="sz${s.id}">${s.label}<small>${s.note}</small></label>`).join("")}</div>
     </div>
-    <div class="opt"><span class="opt-label">Flavour</span>
-      <div class="opt-row" role="radiogroup">${D.FLAVOURS.map((f, i) => `<input type="radio" name="flavour" id="fl${i}" value="${esc(f)}" ${i ? "" : "checked"}><label for="fl${i}">${esc(f)}</label>`).join("")}</div>
+    <div class="opt"><span class="opt-label">Flavour <span class="req">*</span></span>
+      <div class="opt-row flav" role="radiogroup">${D.FLAVOURS.map((f, i) => `<input type="radio" name="flavour" id="fl${i}" value="${esc(f)}"><label for="fl${i}"><i style="--c:${FLAV_COLOURS[f] || "var(--lilac)"}"></i>${esc(f)}</label>`).join("")}<input type="radio" name="flavour" id="flOther" value="Other"><label for="flOther">＋ Other</label></div>
+      <div class="field b-other" id="flOtherWrap" hidden><input id="flOtherText" maxlength="60" placeholder="Which flavour? e.g. Coffee, Pistachio, Mango" aria-label="Other flavour"></div>
     </div>
     <div class="opt field"><label for="pdMsg">${isCup ? "Colour or theme notes" : "Message on cake"} <span class="muted" style="text-transform:none;letter-spacing:0">(optional)</span></label>
       <input id="pdMsg" maxlength="60" placeholder="${isCup ? "e.g. pink & gold for a shower" : "e.g. Happy 30th Sarah"}"></div>
@@ -319,8 +321,8 @@
       <div class="form-grid">
         <div class="field"><label for="qName">Name <span class="req">*</span></label><input id="qName" name="qname" autocomplete="name" required></div>
         <div class="field"><label for="qEmail">Email <span class="req">*</span></label><input id="qEmail" name="qemail" type="email" autocomplete="email" required></div>
-        <div class="field"><label for="qPhone">Phone</label><input id="qPhone" name="qphone" type="tel" autocomplete="tel"></div>
-        <div class="field"><label for="qDate">Date needed</label><input id="qDate" name="qdate" type="date" min="${isoDate(minDate)}"></div>
+        <div class="field"><label for="qPhone">Phone <span class="req">*</span></label><input id="qPhone" name="qphone" type="tel" autocomplete="tel" required></div>
+        <div class="field"><label for="qDate">Pickup date <span class="req">*</span></label><input id="qDate" name="qdate" type="date" min="${isoDate(minDate)}" required></div>
         <div class="field full"><label for="qNotes">Anything else?</label><textarea id="qNotes" name="qnotes" placeholder="Colours, design changes, allergies, number of guests"></textarea></div>
       </div>
     </div>
@@ -332,15 +334,21 @@
 </div>`;
     $$(".pd-thumbs button").forEach(b => b.addEventListener("click", () => { $("#pdMain").src = b.dataset.src; $$(".pd-thumbs button").forEach(x => x.classList.toggle("active", x === b)); }));
     const form = $("#pdForm"), out = $("#qMsg");
-    const upd = () => { const s = sizes.find(x => x.id === form.size.value); $("#pdServes").textContent = s.note; };
+    const upd = () => { const s = sizes.find(x => x.id === form.size.value); $("#pdServes").textContent = s ? s.note : ""; };
     form.addEventListener("change", upd); upd();
+    const flWrap = $("#flOtherWrap"), flText = $("#flOtherText");
+    form.addEventListener("change", e => { if (e.target.name === "flavour") { flWrap.hidden = e.target.value !== "Other"; if (!flWrap.hidden) flText.focus(); } });
     if (location.hash === "#quote") setTimeout(() => $("#qName").scrollIntoView({ behavior: "smooth", block: "center" }), 150);
     form.addEventListener("submit", e => {
       e.preventDefault();
       if (form.company.value) return; // bot
+      if (!form.size.value) { out.className = "form-msg err show"; out.textContent = `Please choose a ${isCup ? "quantity" : "size"}.`; const sr = $(".opt-row.sizes", form); sr.classList.add("shake"); setTimeout(() => sr.classList.remove("shake"), 500); sr.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+      if (!form.flavour.value) { out.className = "form-msg err show"; out.textContent = "Please choose a flavour."; const fr = $(".opt-row.flav", form); fr.classList.add("shake"); setTimeout(() => fr.classList.remove("shake"), 500); fr.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+      if (form.flavour.value === "Other" && !flText.value.trim()) { out.className = "form-msg err show"; out.textContent = "Please type your flavour."; flText.focus(); return; }
       const bad = $$("[required]", form).find(f => !f.value.trim() || (f.type === "email" && !/^\S+@\S+\.\S+$/.test(f.value)));
-      if (bad) { out.className = "form-msg err show"; out.textContent = "Please add your name and a valid email."; bad.focus(); return; }
-      const s = sizes.find(x => x.id === form.size.value), fl = form.flavour.value, cakeMsg = $("#pdMsg").value.trim();
+      if (bad) { out.className = "form-msg err show"; out.textContent = "Please add your name, a valid email, phone and pickup date."; bad.focus(); return; }
+      if (form.qdate.value < form.qdate.min) { out.className = "form-msg err show"; out.textContent = "Please choose a date from tomorrow onwards."; form.qdate.focus(); return; }
+      const s = sizes.find(x => x.id === form.size.value), fl = form.flavour.value === "Other" ? flText.value.trim() : form.flavour.value, cakeMsg = $("#pdMsg").value.trim();
       const name = form.qname.value.trim(), email = form.qemail.value.trim(), phone = form.qphone.value.trim() || "-", date = form.qdate.value || "-";
       const details = [`Cake: ${p.name}`, `${isCup ? "Quantity" : "Size"}: ${s.label} (${s.note})`, `Flavour: ${fl}`, cakeMsg && `${isCup ? "Theme" : "Message on cake"}: ${cakeMsg}`, form.qnotes.value.trim() && `Notes: ${form.qnotes.value.trim()}`].filter(Boolean).join("\n");
       const data = { Name: name, Email: email, Phone: phone, Cake: p.name, "Date needed": date, Details: "\n" + details };
@@ -349,7 +357,7 @@
       sendForm("contact", `Quote request: ${p.name} (${name})`, data, prm).then(mode => {
         out.className = "form-msg ok show";
         out.textContent = mode === "mailto" ? "Your email app has opened with your request. Just press send!" : "Thank you! We'll reply with your quote within one business day.";
-        if (mode !== "mailto") form.reset(), upd();
+        if (mode !== "mailto") form.reset(), upd(), flWrap.hidden = true;
       }).catch(() => { out.className = "form-msg err show"; out.textContent = `Something went wrong. Please call us on ${B.phone}.`; })
         .finally(() => { btn.disabled = false; });
     });

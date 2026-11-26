@@ -1075,3 +1075,8 @@ body[data-page="contact"] .page-banner + section { padding-top: clamp(44px, 6vw,
 .b-other { margin-top: 10px; max-width: 360px; }
 .b-other[hidden] { display: none; }
 .b-progress.two { grid-template-columns: repeat(2, 1fr); max-width: 320px; margin: 18px auto 22px; }
+/* Shop cake page: colour dots on flavour options */
+.opt-row.flav label { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; }
+.opt-row.flav label i { width: 16px; height: 16px; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); flex: none; }
+.opt-row.flav input:checked + label { background: var(--wine); color: #fff; box-shadow: none; }
+.opt-row.flav input:checked + label i { box-shadow: 0 0 0 2px #fff; }
