@@ -460,20 +460,68 @@
   /* ---------- Contact ---------- */
   pages.contact = () => {
     const form = $("#contactForm"), msg = $("#ctMsg");
-    const d = new Date(); d.setDate(d.getDate() + C.leadTimeDays); form.date.min = isoDate(d);
+    const d = new Date(); d.setDate(d.getDate() + 1); form.date.min = isoDate(d);   // only past days and today are locked
+    const send = $("#ctSend");
+    const pick = n => $$(`[name="${n}"]:checked`, form).map(i => i.value).join(", ");
+    const say = (t, ok) => { msg.className = "form-msg show " + (ok ? "ok" : "err"); msg.textContent = t; };
+    const flavOther = $("#ctFlavOther"), flavWrap = $("#ctFlavWrap"), occWrap = $("#ctOccWrap");
+    const occasion = () => { const o = pick("occasion"), t = form.occasionText.value.trim(); return o === "Something else" && t ? t : o; };
+    const flavours = () => [pick("flavour"), flavOther.checked && form.flavourText.value.trim()].filter(Boolean).join(", ");
+    form.addEventListener("change", e => {
+      if (e.target.name === "occasion") {
+        msg.className = "form-msg";
+        occWrap.hidden = e.target.value !== "Something else";
+        if (!occWrap.hidden) form.occasionText.focus();
+      }
+      if (e.target === flavOther) { flavWrap.hidden = !flavOther.checked; if (flavOther.checked) form.flavourText.focus(); }
+    });
+    form.addEventListener("reset", () => { flavWrap.hidden = true; occWrap.hidden = true; });
+    const steps = $$(".b-step", form), dots = $$(".b-progress li", form), back = $("#ctBack"), next = $("#ctNext");
+    const occ = $("[data-group=occasion]", form);
+    function show(i) {
+      steps.forEach((s, j) => s.classList.toggle("on", j === i));
+      dots.forEach((s, j) => { s.classList.toggle("on", j === i); s.classList.toggle("done", j < i); });
+      back.hidden = i === 0; next.hidden = i === 1; send.hidden = i !== 1;
+      msg.className = "form-msg";
+      const top = form.getBoundingClientRect().top;
+      if (top < 0) window.scrollTo({ top: window.scrollY + top - 100, behavior: "smooth" });
+      if (i === 1) setTimeout(() => form.name.focus({ preventScroll: true }), 50);
+    }
+    const shake = el => { el.classList.add("shake"); setTimeout(() => el.classList.remove("shake"), 500); };
+    const step1Ok = () => {
+      if (!pick("occasion")) { say("Please choose an occasion."); shake(occ); return false; }
+      if (!flavours()) {
+        if (flavOther.checked) { say("Please type your flavour."); form.flavourText.focus(); }
+        else { say("Please pick at least one flavour."); shake($("[data-group=flavour]", form)); }
+        return false;
+      }
+      if (!form.message.value.trim()) { say("Please tell us a little about your cake idea."); form.message.focus(); return false; }
+      return true;
+    };
+    next.addEventListener("click", () => { if (step1Ok()) show(1); });
+    back.addEventListener("click", () => show(0));
+    dots[0].addEventListener("click", () => show(0));
+    form.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.tagName === "INPUT" && !next.hidden) { e.preventDefault(); next.click(); } });
     form.addEventListener("submit", e => {
       e.preventDefault();
       if (form.company.value) return;
-      const bad = $$("[required]", form).find(f => !f.value.trim() || (f.type === "email" && !/^\S+@\S+\.\S+$/.test(f.value)));
-      if (bad) { msg.className = "form-msg err show"; msg.textContent = "Please fill in your name, email and message."; bad.focus(); return; }
-      const data = { Name: form.name.value, Email: form.email.value, Phone: form.phone.value || "-", Occasion: form.occasion.value, "Date needed": form.date.value || "-", Guests: form.guests.value || "-", Message: form.message.value };
-      const params = { from_name: form.name.value, reply_to: form.email.value, phone: form.phone.value || "-", occasion: form.occasion.value,
-        date_needed: form.date.value || "-", guests: form.guests.value || "-", enquiry: form.message.value };
-      sendForm("contact", `Cake enquiry from ${form.name.value}`, data, params).then(mode => {
-        msg.className = "form-msg ok show";
-        msg.textContent = mode === "mailto" ? "Your email app has opened with your message. Just press send!" : "Thank you! We'll get back to you within one business day.";
-        if (mode !== "mailto") form.reset();
-      }).catch(() => { msg.className = "form-msg err show"; msg.textContent = `Something went wrong. Please call us on ${B.phone}.`; });
+      if (!next.hidden) return next.click();
+      if (!step1Ok()) return show(0);
+      const bad = $$("[required]", steps[1]).find(f => !f.value.trim() || (f.type === "email" && !/^\S+@\S+\.\S+$/.test(f.value)));
+      if (bad) { say("Please add your name, a valid email, phone and pickup date."); bad.focus(); return; }
+      if (form.date.value < form.date.min) { say("Please choose a pickup date from tomorrow onwards."); form.date.focus(); return; }
+      const f = { Occasion: occasion(), Guests: pick("guests") || "-", Flavours: flavours() || "-",
+        "Pickup date": form.date.value || "-", "Cake idea": form.message.value.trim() || "-" };
+      const enquiry = Object.entries(f).map(([k, v]) => `${k}: ${v}`).join("\n");
+      const data = Object.assign({ Name: form.name.value, Email: form.email.value, Phone: form.phone.value || "-" }, f);
+      const params = { from_name: form.name.value, reply_to: form.email.value, phone: form.phone.value || "-",
+        occasion: f.Occasion, date_needed: f["Pickup date"], guests: f.Guests, enquiry };
+      send.disabled = true;
+      sendForm("contact", `Cake request: ${f.Occasion} from ${form.name.value}`, data, params).then(mode => {
+        if (mode !== "mailto") { form.reset(); show(0); }
+        say(mode === "mailto" ? "Your email app has opened with your request. Just press send!" : "Thank you! We'll reply with your quote within one business day.", true);
+      }).catch(() => say(`Something went wrong. Please call or text us on ${B.phone}.`))
+        .finally(() => { send.disabled = false; });
     });
   };
 

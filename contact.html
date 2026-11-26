@@ -37,20 +37,66 @@
         <div class="map-wrap"><iframe title="Map of our pickup area, Greater Vancouver" src="https://www.google.com/maps?q=Greater+Vancouver,+BC&amp;z=10&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>
         <p class="map-note">Pickup only. We share the exact pickup address once your order is confirmed.</p>
       </div>
-      <form class="card reveal" id="contactForm" novalidate>
-        <h3>Custom cake enquiry</h3>
+      <form class="card reveal builder" id="contactForm" novalidate>
+        <h3>Request a cake quote</h3>
+        <p class="muted b-sub">Tap a few choices and we'll reply with a personal quote within one business day.</p>
+
+        <ol class="b-progress two" aria-label="Steps">
+          <li class="on"><span>1</span>Your cake</li>
+          <li><span>2</span>Your details</li>
+        </ol>
+
+        <div class="b-step on" data-step="1">
+        <p class="b-label">Occasion <span class="req">*</span></p>
+        <div class="tiles t4" data-group="occasion" data-required>
+          <label class="tile sm"><input type="radio" name="occasion" value="Birthday"><span class="emo">🎂</span><b>Birthday</b></label>
+          <label class="tile sm"><input type="radio" name="occasion" value="Wedding"><span class="emo">💍</span><b>Wedding</b></label>
+          <label class="tile sm"><input type="radio" name="occasion" value="Baby / bridal shower"><span class="emo">🍼</span><b>Shower</b></label>
+          <label class="tile sm"><input type="radio" name="occasion" value="Something else"><span class="emo">✨</span><b>Other</b></label>
+        </div>
+        <div class="field b-other" id="ctOccWrap" hidden><input id="ctOccText" name="occasionText" maxlength="60" placeholder="What's the occasion? e.g. Graduation, Retirement" aria-label="Other occasion"></div>
+
+        <p class="b-label">Guests</p>
+        <div class="pchips" data-group="guests">
+          <label class="pchip"><input type="radio" name="guests" value="Up to 10"><span>Up to 10</span></label>
+          <label class="pchip"><input type="radio" name="guests" value="10–25"><span>10–25</span></label>
+          <label class="pchip"><input type="radio" name="guests" value="25–50"><span>25–50</span></label>
+          <label class="pchip"><input type="radio" name="guests" value="50+"><span>50+</span></label>
+        </div>
+
+        <p class="b-label">Flavour <span class="req">*</span> <small>pick any</small></p>
+        <div class="pchips" data-group="flavour">
+          <label class="pchip sw"><input type="checkbox" name="flavour" value="Vanilla Bean"><span><i style="--c:#F3E3B5"></i>Vanilla</span></label>
+          <label class="pchip sw"><input type="checkbox" name="flavour" value="Rich Chocolate"><span><i style="--c:#5B3426"></i>Chocolate</span></label>
+          <label class="pchip sw"><input type="checkbox" name="flavour" value="Red Velvet"><span><i style="--c:#A3202C"></i>Red velvet</span></label>
+          <label class="pchip sw"><input type="checkbox" name="flavour" value="Lemon"><span><i style="--c:#F6D84C"></i>Lemon</span></label>
+          <label class="pchip sw"><input type="checkbox" name="flavour" value="Strawberry"><span><i style="--c:#F08AA0"></i>Strawberry</span></label>
+          <label class="pchip sw"><input type="checkbox" name="flavour" value="Marble"><span><i style="--c:linear-gradient(135deg,#F3E3B5 50%,#5B3426 50%)"></i>Marble</span></label>
+          <label class="pchip"><input type="checkbox" name="flavourOther" id="ctFlavOther"><span>＋ Other</span></label>
+        </div>
+        <div class="field b-other" id="ctFlavWrap" hidden><input id="ctFlavText" name="flavourText" maxlength="60" placeholder="Which flavour? e.g. Coffee, Pistachio, Mango" aria-label="Other flavour"></div>
+
+        <div class="form-grid" style="margin-top:24px">
+          <div class="field full"><label for="ctMessage">Your cake idea <span class="req">*</span></label><textarea id="ctMessage" name="message" rows="3" required placeholder="Theme, colours, message on the cake, allergies, inspiration links&hellip;"></textarea></div>
+        </div>
+        </div>
+
+        <div class="b-step" data-step="2">
         <div class="form-grid">
           <div class="field"><label for="ctName">Your name <span class="req">*</span></label><input id="ctName" name="name" autocomplete="name" required></div>
           <div class="field"><label for="ctEmail">Email <span class="req">*</span></label><input id="ctEmail" name="email" type="email" autocomplete="email" required></div>
-          <div class="field"><label for="ctPhone">Phone</label><input id="ctPhone" name="phone" type="tel" autocomplete="tel"></div>
-          <div class="field"><label for="ctOcc">Occasion</label><select id="ctOcc" name="occasion"><option>Birthday</option><option>Wedding</option><option>Anniversary</option><option>Baby shower</option><option>Bridal shower</option><option>Corporate event</option><option>Other / general question</option></select></div>
-          <div class="field"><label for="ctDate">Date needed</label><input id="ctDate" name="date" type="date"></div>
-          <div class="field"><label for="ctGuests">Number of guests</label><input id="ctGuests" name="guests" type="number" min="1" inputmode="numeric"></div>
-          <div class="field full"><label for="ctMessage">Tell us about your dream cake <span class="req">*</span></label><textarea id="ctMessage" name="message" required placeholder="Theme, colours, flavour, message on the cake, allergies, links to inspiration photos&hellip;"></textarea></div>
+          <div class="field"><label for="ctPhone">Phone <span class="req">*</span></label><input id="ctPhone" name="phone" type="tel" autocomplete="tel" required></div>
+          <div class="field"><label for="ctDate">Pickup date <span class="req">*</span></label><input id="ctDate" name="date" type="date" required></div>
         </div>
+        </div>
+
         <input class="hp" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">
-        <button class="btn" type="submit" style="margin-top:22px">Send enquiry</button>
         <div class="form-msg" id="ctMsg" role="status"></div>
+        <div class="b-nav">
+          <button class="btn ghost" type="button" id="ctBack" hidden>Back</button>
+          <button class="btn" type="button" id="ctNext">Next</button>
+          <button class="btn" type="submit" id="ctSend" hidden>Send my request</button>
+        </div>
       </form>
     </div>
   </section>
