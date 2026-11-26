@@ -1080,3 +1080,4 @@ body[data-page="contact"] .page-banner + section { padding-top: clamp(44px, 6vw,
 .opt-row.flav label i { width: 16px; height: 16px; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); flex: none; }
 .opt-row.flav input:checked + label { background: var(--wine); color: #fff; box-shadow: none; }
 .opt-row.flav input:checked + label i { box-shadow: 0 0 0 2px #fff; }
+.anchor { display:block; scroll-margin-top: 110px; }

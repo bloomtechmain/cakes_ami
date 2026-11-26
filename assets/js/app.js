@@ -468,6 +468,10 @@
   /* ---------- Contact ---------- */
   pages.contact = () => {
     const form = $("#contactForm"), msg = $("#ctMsg");
+    if (location.hash === "#custom") {   // re-land on the form after JS content and images shift the layout
+      const go = () => $("#custom").scrollIntoView({ block: "start" });
+      setTimeout(go, 100); window.addEventListener("load", () => setTimeout(go, 50), { once: true });
+    }
     const d = new Date(); d.setDate(d.getDate() + 1); form.date.min = isoDate(d);   // only past days and today are locked
     const send = $("#ctSend");
     const pick = n => $$(`[name="${n}"]:checked`, form).map(i => i.value).join(", ");
